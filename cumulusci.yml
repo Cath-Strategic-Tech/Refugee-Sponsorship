@@ -7,11 +7,56 @@ project:
         api_version: '52.0'
     dependencies:
         - github: 'https://github.com/SalesforceFoundation/PMM'
+        - github: 'https://github.com/SalesforceFoundation/Relationships'
+        - version_id: 04t4W00000309DuQAI
+        - version_id: 04t5G0000047xO4QAI
+        - version_id: 04t5G000003rUaWQAU
+
     git:
         default_branch: 'main'
     source_format: sfdx
 
 tasks:
+
+    add_pmm_engagement_stages:
+        description: Adds additional picklist vales to the Stage field to support Refugee Support
+        class_path: cumulusci.tasks.metadata_etl.picklists.AddPicklistEntries
+        options:
+            picklists: pmdm__ProgramEngagement__c.pmdm__Stage__c
+            entries:
+                - fullName: "Inquiry"
+                  label: "Inquiry"
+                - fullName: "Submission of Applications"
+                  label: "Submission of Applications"
+                - fullName: "Application Processing"
+                  label: "Application Processing"
+                - fullName: "Preparing for Arrival"
+                  label: "Preparing for Arrival"
+                - fullName: "Landed - 12 Months"
+                  label: "Landed - 12 Months"
+                - fullName: "Transferred"
+                  label: "Transferred"
+
+    deploy_npspdataloader_fields:
+        description: Deploy custom NPSP Data Loader fields
+        class_path: cumulusci.tasks.salesforce.Deploy
+        options:
+            path: unpackaged/config/npspdataloader
+
+    list_changes:
+        name: List Changes from Scratch Org
+        description: List the changes from a scratch org
+        class_path: cumulusci.tasks.salesforce.sourcetracking.ListChanges
+        options:
+            exclude: "Profile, PicklistValue, StandardValueSet"
+
+    retrieve_changes:
+        name: Retrieve Changes from Scratch Org
+        description: Retrieve changed components from a scratch org
+        class_path: cumulusci.tasks.salesforce.sourcetracking.RetrieveChanges
+        options:
+            exclude: "Profile, PicklistValue, StandardValueSet"
+
     robot:
         options:
             suites: robot/Refugee-Sponsorship/tests
@@ -26,3 +71,103 @@ tasks:
     run_tests:
         options:
             required_org_code_coverage_percent: 75
+
+    update_admin_profile:
+        class_path: cumulusci.tasks.salesforce.UpdateAdminProfile
+        options:
+            package_xml: lib/admin_profile.xml
+
+    update_admin_profile_record_types:
+        class_path: cumulusci.tasks.salesforce.UpdateAdminProfile
+        options:
+            record_types:
+                - record_type: pmdm__ProgramEngagement__c.Refugees_Program
+                  default: true
+
+    uninstall_packaged_incremental:
+        description: Deletes any metadata from the package in the target org not in the local workspace
+        class_path: cumulusci.tasks.salesforce.UninstallPackagedIncremental
+        options:
+            ignore:
+                QuickAction:
+                    - NewEvent
+                    - NewCase
+                    - NewLead
+                    - NewContact
+                    - NewOpportunity
+                    - NewTask
+                    - LogACall
+                    - NewNote
+            ignore_types:
+                - RecordType
+                - Flow
+                - FlowDefinition
+
+    load_dataset:
+        options:
+            sql_path: datasets/sf-sample.sql
+            drop_missing_schema: "true"
+    
+
+
+flows:
+    install_uat:
+        steps:
+            1:
+                task: add_pmm_engagement_stages
+            2:
+                task: install_managed_beta
+            3:
+                task: assign_permission_sets
+                options:
+                    api_names:
+                        - Refugees_Program
+                        - USF_Flow_Screen_Component_Datatable
+
+    install_prod:
+        steps:
+            1:
+                task: add_pmm_engagement_stages
+            2:
+                task: install_managed
+            3:
+                task: update_admin_profile_record_types
+            4:    
+                task: assign_permission_set_groups
+                options:
+                    api_names:
+                        - Refugees_Program_Management
+
+    dependencies:
+        steps:
+            3:
+                task: add_pmm_engagement_stages
+
+    config_dev:
+        steps:
+            3:
+                task: update_admin_profile_record_types
+            4:
+                task: load_dataset
+    
+    config_qa:
+        steps:
+            3:
+                task: update_admin_profile_record_types
+            4:
+                task: load_dataset 
+
+    delete_data:
+        steps:
+            1:
+                task: delete_data
+                options:
+                    objects:
+                        - pmdm__ServiceDelivery__c
+                        - pmdm__ProgramEngagement__c
+                        - pmdm__ServiceParticipant__c
+                        - pmdm__ServiceSession__c
+                        - pmdm__ServiceSchedule__c
+                        - pmdm__Service__c
+                        - Contact
+                        - Account

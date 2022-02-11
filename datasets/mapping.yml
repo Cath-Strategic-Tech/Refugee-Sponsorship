@@ -1,45 +1,120 @@
-Insert Accounts:
-    sf_object: Account
-    table: Account
-    fields:
-        Name: Name
-        Description: Description
-        BillingStreet: BillingStreet
-        BillingCity: BillingCity
-        BillingState: BillingState
-        BillingPostalCode: BillingPostalCode
-        BillingCountry: BillingCountry
-        ShippingStreet: ShippingStreet
-        ShippingCity: ShippingCity
-        ShippingState: ShippingState
-        ShippingPostalCode: ShippingPostalCode
-        ShippingCountry: ShippingCountry
-        Phone: Phone
-        Fax: Fax
-        Website: Website
-        NumberOfEmployees: NumberOfEmployees
-        AccountNumber: AccountNumber
-        Site: Site
-        Type: Type
-Insert Contacts:
-    sf_object: Contact
-    table: Contact
-    fields:
-        Salutation: Salutation
-        FirstName: FirstName
-        LastName: LastName
-        Email: Email
-        Phone: Phone
-        MobilePhone: MobilePhone
-        OtherPhone: OtherPhone
-        HomePhone: HomePhone
-        Title: Title
-        Birthdate: Birthdate
-        MailingStreet: MailingStreet
-        MailingCity: MailingCity
-        MailingState: MailingState
-        MailingPostalCode: MailingPostalCode
-        MailingCountry: MailingCountry
-    lookups:
-        AccountId:
-            table: Account
+Insert Account:
+  sf_object: Account
+  fields:
+  - Name
+  - BillingCity
+  - BillingCountry
+  lookups:
+    ParentId:
+      table: Account
+      after: Insert Account
+Insert ers_datatableConfig__c:
+  sf_object: ers_datatableConfig__c
+  fields:
+  - Active__c
+  - Alignments__c
+  - Cell_Attributes__c
+  - Edits__c
+  - Field_API_Names__c
+  - Filters__c
+  - Icons__c
+  - Labels__c
+  - Name
+  - Object_API_Name__c
+  - Other_Attributes__c
+  - Selection_Method__c
+  - Type_Attributes__c
+  - Widths__c
+  - Wraps__c
+Insert pmdm__Program__c:
+  sf_object: pmdm__Program__c
+  fields:
+  - Name
+  - pmdm__Description__c
+  - pmdm__EndDate__c
+  - pmdm__ProgramIssueArea__c
+  - pmdm__ShortSummary__c
+  - pmdm__StartDate__c
+  - pmdm__Status__c
+  - pmdm__TargetPopulation__c
+Insert Contact:
+  sf_object: Contact
+  fields:
+  - DoNotCall
+  - English_Language_Proficiency__c
+  - FirstName
+  - HasOptedOutOfEmail
+  - HasOptedOutOfFax
+  - LastName
+  - UCI__c
+  - pmdm__ConsecutiveAbsences__c
+  - pmdm__IsClient__c
+  - pmdm__LastServiceDate__c
+  - pmdm__NumAbsentServiceDeliveries__c
+  - pmdm__NumPresentServiceDeliveries__c
+  lookups:
+    AccountId:
+      table: Account
+    ReportsToId:
+      table: Contact
+      after: Insert Contact
+Insert Program_Engagement_Group__c:
+  sf_object: Program_Engagement_Group__c
+  fields:
+  - Comments__c
+  lookups:
+    Program__c:
+      table: pmdm__Program__c
+Insert pmdm__ProgramCohort__c:
+  sf_object: pmdm__ProgramCohort__c
+  fields:
+  - Name
+  - pmdm__Description__c
+  - pmdm__EndDate__c
+  - pmdm__StartDate__c
+  - pmdm__Status__c
+  lookups:
+    pmdm__Program__c:
+      table: pmdm__Program__c
+Insert pmdm__ProgramEngagement__c:
+  sf_object: pmdm__ProgramEngagement__c
+  fields:
+  - Digital_Files__c
+  - Finance_Code__c
+  - G_Number__c
+  - Legacy_Notes__c
+  - Main_PA_in_Group__c
+  - Monthly_RAP_Rate__c
+  - Name
+  - Paper_File_Location__c
+  - RecordTypeId
+  - Start_Up_Costs__c
+  - pmdm__ApplicationDate__c
+  - pmdm__AutoName_Override__c
+  - pmdm__ConsecutiveAbsences__c
+  - pmdm__EndDate__c
+  - pmdm__LastServiceDate__c
+  - pmdm__NumAbsentServiceDeliveries__c
+  - pmdm__NumPresentServiceDeliveries__c
+  - pmdm__Role__c
+  - pmdm__Stage__c
+  - pmdm__StartDate__c
+  lookups:
+    Constituent_Group__c:
+      table: Account
+    Program_Engagement_Group__c:
+      table: Program_Engagement_Group__c
+    Refuge_CoSponsor_B__c:
+      table: Contact
+    Refuge_CoSponsor__c:
+      table: Contact
+    Visa_Office__c:
+      table: Account
+    pmdm__Account__c:
+      table: Account
+    pmdm__Contact__c:
+      table: Contact
+    pmdm__ProgramCohort__c:
+      table: pmdm__ProgramCohort__c
+    pmdm__Program__c:
+      table: pmdm__Program__c

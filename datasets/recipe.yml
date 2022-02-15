@@ -1,0 +1,109 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/SFDO-Tooling/Snowfakery/main/schema/snowfakery_recipe.jsonschema.json
+
+- object: pmdm__Program__c
+  fields:
+    Name: Refugee Program
+    pmdm__Status__c: Active
+
+- macro: Contact__m
+  fields:
+    AccountId:
+      reference: Account
+    FirstName:
+      fake: FirstName
+    LastName: ${{Account.__LastName}}
+    Birthdate:
+      date_between:
+        start_date: -70y
+        end_date: -20y
+    MailingCountry: ${{Account.__MailingCountry}}
+    MailingCity: ${{Account.__MailingCity}}
+    Email:
+      fake: Email
+    English_Language_Proficiency__c:
+      random_choice:
+        - "None"
+        - Low
+        - Medium
+        - High
+    UCI__c:
+      if:
+        - choice:
+            when: ${{Account.__Arrived}}
+            pick: ${{unique_id}}
+        - choice:
+            pick: NULL
+
+- macro: Account__m
+  fields:
+    __Arrived: False
+    __LastName:
+      fake: LastName
+    Name: ${{__LastName}} Household
+    __MailingCountry:
+      fake: Country
+    __MailingCity:
+      fake: City
+  friends:
+    - object: Contact
+      nickname: PrincipalApplicant
+      include: Contact__m
+      count: 1
+      friends:
+        - object: pmdm__ProgramEngagement__c
+          fields:
+            pmdm__Program__c: 
+              reference: pmdm__Program__c
+            pmdm__Contact__c:
+              reference: Contact
+            pmdm__Account__c:
+              reference: Account
+            pmdm__Stage__c:
+              if:
+                - choice:
+                    when: ${{Account.__Arrived}}
+                    pick: Landed - 12 Months
+                - choice:
+                    pick: Submission of Applications
+            G_Number__c:
+              if:
+                - choice:
+                    when: ${{Account.__Arrived}}
+                    pick: G${{unique_id}}
+                - choice:
+                    pick: NULL
+
+        - object: Contact
+          nickname: Spouse
+          include: Contact__m
+          count:
+            random_number:
+              min: 0
+              max: 1
+
+        - object: Contact
+          nickname: Child
+          include: Contact__m
+          count:
+            random_number:
+              min: 0
+              max: 5
+          fields:
+            Email: NULL
+            Birthdate:
+              date_between:
+                start_date: -20y
+                end_date: -6m
+            English_Language_Proficiency__c: "None"
+
+- object: Account
+  nickname: RemoteApplicantGroup
+  include: Account__m
+
+- object: Account
+  nickname: ArrivedRefugee
+  include: Account__m
+  fields:
+    __Arrived: True
+    __MailingCountry: Canada
+    

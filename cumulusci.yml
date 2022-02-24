@@ -107,7 +107,6 @@ tasks:
         options:
             sql_path: datasets/sf-sample.sql
             drop_missing_schema: "true"
-    
 
 
 flows:
@@ -148,14 +147,14 @@ flows:
             3:
                 task: update_admin_profile_record_types
             4:
-                task: load_dataset
+                task: snowfakery
     
     config_qa:
         steps:
             3:
                 task: update_admin_profile_record_types
             4:
-                task: load_dataset 
+                task: snowfakery 
 
     delete_data:
         steps:
